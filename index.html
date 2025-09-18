@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PLA Insurance Products</title>
+    <title>ข้อมูลแบบประกัน</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -63,7 +63,7 @@
       <!-- Footer -->
       <footer class="text-center mt-10 text-sm text-gray-500">
         <p>
-          &copy; 2025 SMART SOLUTIONS PARTNER CO., LTD. |
+          &copy; 2025 Your Insurance Co. |
           ข้อมูลนี้เป็นเพียงข้อมูลเบื้องต้นเพื่อประกอบการตัดสินใจ
         </p>
       </footer>
@@ -676,6 +676,8 @@
           takaful: `<svg class="w-5 h-5 text-teal-500 mr-2 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 2.75a.75.75 0 00-1.5 0v8.25a.75.75 0 001.5 0V2.75z" /><path fill-rule="evenodd" d="M3.294 3.293a1 1 0 011.414 0l.235.236a.75.75 0 001.06-.002l.236-.235a1 1 0 011.414 0l.235.236a.75.75 0 001.06-.002l.236-.235a1 1 0 011.414 0l.235.236a.75.75 0 001.06-.002l.236-.235a1 1 0 011.414 0l.235.236a.75.75 0 001.06-.002L16.207 3.5a1 1 0 011.414 1.414l-.236.235a.75.75 0 00.002 1.06l.235.236a1 1 0 010 1.414l-.236.235a.75.75 0 00-.002 1.06l.235.236a1 1 0 010 1.414l-.236.235a.75.75 0 00-.002 1.06l.235.236a1 1 0 010 1.414l-.236.235a.75.75 0 00-.002 1.06l.235.236a1 1 0 01-1.414 1.414l-.235-.236a.75.75 0 00-1.06.002l-.236.235a1 1 0 01-1.414 0l-.235-.236a.75.75 0 00-1.06.002l-.236.235a1 1 0 01-1.414 0l-.235-.236a.75.75 0 00-1.06.002l-.236.235a1 1 0 01-1.414 0l-.235-.236a.75.75 0 00-1.06.002L3.5 16.207a1 1 0 01-1.414-1.414l.236-.235a.75.75 0 00-.002-1.06L2.086 13.26a1 1 0 010-1.414l.235-.236a.75.75 0 00.002-1.06L2.086 9.293a1 1 0 010-1.414l.235-.236a.75.75 0 00.002-1.06L2.086 5.326a1 1 0 010-1.414l.235-.236a.75.75 0 00.002-1.06L2.586 2.38a1 1 0 011.414-1.414l.235.236a.75.75 0 001.06.002l.236-.235a1 1 0 011.414 0l-.235.236a.75.75 0 00-.002 1.06l.236.235a1 1 0 011.414 0l.235-.236a.75.75 0 001.06-.002l.236-.235a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>`,
         };
 
+        let currentPlan = null;
+
         // --- UI POPULATION & RENDERING ---
         function populateSelector() {
           if (!insuranceData.planFamilies) return;
@@ -702,14 +704,18 @@
           }
         }
 
-        function renderPlanDetails(planId) {
-          let plan;
+        function findPlanById(planId) {
           for (const family of insuranceData.planFamilies) {
-            plan = family.plans.find((p) => p.id === planId);
-            if (plan) break;
+            const plan = family.plans.find((p) => p.id === planId);
+            if (plan) return plan;
           }
+          return null;
+        }
 
-          if (!plan) {
+        function renderPlanDetails(planId) {
+          currentPlan = findPlanById(planId);
+
+          if (!currentPlan) {
             planDetailsContainer.innerHTML =
               "<p>ไม่พบข้อมูลสำหรับแบบประกันที่เลือก</p>";
             return;
@@ -729,17 +735,17 @@
               .join("");
 
           // Helper to render selling points section
-          const sellingPointsHtml = plan.sellingPoints
+          const sellingPointsHtml = currentPlan.sellingPoints
             ? `
                     <div class="p-6 border-t border-gray-200">
                         <h3 class="text-lg font-semibold mb-3 text-gray-800 flex items-center">${
                           icons.star
-                        } ${plan.sellingPoints.title}</h3>
+                        } ${currentPlan.sellingPoints.title}</h3>
                         <p class="text-sm text-gray-700 mb-4 bg-amber-50 p-4 rounded-lg border-l-4 border-amber-400">${
-                          plan.sellingPoints.targetGroup
+                          currentPlan.sellingPoints.targetGroup
                         }</p>
                         <ul class="space-y-3 text-sm">
-                            ${plan.sellingPoints.points
+                            ${currentPlan.sellingPoints.points
                               .map(
                                 (point) => `
                                 <li class="flex items-start">
@@ -755,17 +761,17 @@
             : "";
 
           // Helper for Takaful Principle section
-          const takafulPrincipleHtml = plan.takafulPrinciple
+          const takafulPrincipleHtml = currentPlan.takafulPrinciple
             ? `
                     <div class="p-6 border-t border-gray-200">
                         <h3 class="text-lg font-semibold mb-3 text-gray-800 flex items-center">${
                           icons.takaful
-                        } ${plan.takafulPrinciple.title}</h3>
+                        } ${currentPlan.takafulPrinciple.title}</h3>
                         <p class="text-sm text-gray-600 mb-4">${
-                          plan.takafulPrinciple.description
+                          currentPlan.takafulPrinciple.description
                         }</p>
                         <div class="space-y-4">
-                            ${plan.takafulPrinciple.accounts
+                            ${currentPlan.takafulPrinciple.accounts
                               .map(
                                 (account) => `
                                 <div class="bg-teal-50 p-4 rounded-lg border-l-4 border-teal-400">
@@ -781,20 +787,20 @@
             : "";
 
           // Helper to render maturity benefit section
-          const maturityBenefitHtml = plan.maturityBenefit
+          const maturityBenefitHtml = currentPlan.maturityBenefit
             ? `
                     <div class="p-6 border-t border-gray-200">
                         <h3 class="text-lg font-semibold mb-2 text-gray-800 flex items-center">${
                           icons.money
-                        } ${plan.maturityBenefit.title}</h3>
+                        } ${currentPlan.maturityBenefit.title}</h3>
                         <p class="text-sm text-gray-600 mb-4">${
-                          plan.maturityBenefit.description
+                          currentPlan.maturityBenefit.description
                         }</p>
                         <div class="overflow-x-auto rounded-lg border border-gray-200">
                             <table class="min-w-full text-sm text-left text-gray-500">
                                 <thead class="text-xs text-gray-700 uppercase bg-gray-100">
                                     <tr>
-                                        ${plan.maturityBenefit.table.headers
+                                        ${currentPlan.maturityBenefit.table.headers
                                           .map(
                                             (header) =>
                                               `<th scope="col" class="px-6 py-3">${header}</th>`
@@ -803,7 +809,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${plan.maturityBenefit.table.rows
+                                    ${currentPlan.maturityBenefit.table.rows
                                       .map(
                                         (row) => `
                                         <tr class="bg-white border-b last:border-b-0">
@@ -823,24 +829,24 @@
                             </table>
                         </div>
                         <p class="text-xs text-gray-500 mt-3">${
-                          plan.maturityBenefit.note
+                          currentPlan.maturityBenefit.note
                         }</p>
                     </div>
                 `
             : "";
 
           // Helper for Dividend Info section
-          const dividendInfoHtml = plan.dividendInfo
+          const dividendInfoHtml = currentPlan.dividendInfo
             ? `
                     <div class="p-6 border-t border-gray-200">
                         <h3 class="text-lg font-semibold mb-3 text-gray-800 flex items-center">${
                           icons.money
-                        } ${plan.dividendInfo.title}</h3>
+                        } ${currentPlan.dividendInfo.title}</h3>
                         <p class="text-sm text-gray-600 mb-4">${
-                          plan.dividendInfo.description
+                          currentPlan.dividendInfo.description
                         }</p>
                         <ul class="space-y-2 text-sm text-gray-700 list-inside">
-                            ${plan.dividendInfo.points
+                            ${currentPlan.dividendInfo.points
                               .map(
                                 (point) => `
                                 <li class="flex items-start">
@@ -856,14 +862,14 @@
             : "";
 
           // Helper to render additional info section
-          const additionalInfoHtml = plan.additionalInfo
+          const additionalInfoHtml = currentPlan.additionalInfo
             ? `
                     <div class="p-6 border-t border-gray-200">
                         <h3 class="text-lg font-semibold mb-4 text-gray-800 flex items-center">${
                           icons.info
-                        } ${plan.additionalInfo.title}</h3>
+                        } ${currentPlan.additionalInfo.title}</h3>
                         <div class="space-y-4">
-                            ${plan.additionalInfo.sections
+                            ${currentPlan.additionalInfo.sections
                               .map(
                                 (section) => `
                                 <div>
@@ -889,16 +895,18 @@
                     <div class="bg-white rounded-xl shadow-md overflow-hidden animate-fade-in">
                         <div class="p-6">
                             <h2 class="text-2xl font-bold text-blue-700">${
-                              plan.name
+                              currentPlan.name
                             }</h2>
-                            <p class="text-gray-600 mt-1">${plan.summary}</p>
+                            <p class="text-gray-600 mt-1">${
+                              currentPlan.summary
+                            }</p>
                         </div>
                         
                         <!-- Key Details -->
                         <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
                              <h3 class="text-lg font-semibold mb-3 text-gray-800">หลักเกณฑ์การรับประกัน</h3>
                              <div class="grid grid-cols-2 gap-4 text-sm">
-                                ${plan.details
+                                ${currentPlan.details
                                   .map(
                                     (detail) => `
                                     <div>
@@ -910,6 +918,16 @@
                                   .join("")}
                              </div>
                         </div>
+                        
+                        <!-- Calculator Button -->
+                        <div class="p-6 border-t border-gray-200">
+                            <a href="calculator.html?planId=${
+                              currentPlan.id
+                            }" class="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 transition duration-300 flex items-center justify-center shadow-lg hover:shadow-xl text-center">
+                                <svg class="w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008zm0 2.25h.008v.008H8.25v-.008zM9.75 15.75h.008v.008H9.75v-.008zm.75-4.5h.008v.008h-.008v-.008zm2.25.008h.008v.008h-.008v-.008zm2.25-2.25h.008v.008h-.008V9zM3.375 21h17.25c1.657 0 3-1.343 3-3V6c0-1.657-1.343-3-3-3H3.375c-1.657 0-3 1.343-3 3v12c0 1.657 1.343 3 3 3z" /></svg>
+                                คำนวณเบี้ยประกันเบื้องต้น
+                            </a>
+                        </div>
 
                         <!-- Selling Points -->
                         ${sellingPointsHtml}
@@ -920,30 +938,31 @@
                         <!-- Benefits -->
                         <div class="p-6 border-t border-gray-200">
                             <h3 class="text-lg font-semibold mb-4 text-gray-800">${
-                              plan.benefits.title
+                              currentPlan.benefits.title
                             }</h3>
                             <div class="space-y-5">
                                 <!-- Living Benefits -->
                                 <div>
                                     <h4 class="font-semibold text-green-700 mb-2">${
-                                      plan.benefits.living.title
+                                      currentPlan.benefits.living.title
                                     }</h4>
                                     <ul class="space-y-2 text-gray-700">
                                         ${createBenefitPoints(
-                                          plan.benefits.living.points
+                                          currentPlan.benefits.living.points
                                         )}
                                     </ul>
                                 </div>
                                 <!-- Death Benefits -->
                                  <div>
                                     <h4 class="font-semibold text-red-700 mb-2">${
-                                      plan.benefits.death.title
+                                      currentPlan.benefits.death.title
                                     }</h4>
                                     <ul class="space-y-2 text-gray-700">
                                         <li class="flex items-start">
                                             ${icons.death}
                                             <span>${
-                                              plan.benefits.death.points[0]
+                                              currentPlan.benefits.death
+                                                .points[0]
                                             }</span>
                                         </li>
                                     </ul>
@@ -961,12 +980,12 @@
                         <div class="bg-blue-50 px-6 py-5 border-t border-gray-200">
                              <h3 class="text-lg font-semibold mb-3 text-gray-800 flex items-center">${
                                icons.tax
-                             } ${plan.taxInfo.title}</h3>
+                             } ${currentPlan.taxInfo.title}</h3>
                              <p class="text-gray-700 text-sm mb-2">${
-                               plan.taxInfo.description
+                               currentPlan.taxInfo.description
                              }</p>
                              <p class="font-semibold text-blue-800 text-sm">${
-                               plan.taxInfo.condition
+                               currentPlan.taxInfo.condition
                              }</p>
                         </div>
                         
@@ -994,6 +1013,13 @@
             @keyframes fadeIn {
                 from { opacity: 0; transform: translateY(10px); }
                 to { opacity: 1; transform: translateY(0); }
+            }
+            @keyframes modalIn {
+                from { opacity: 0; transform: scale(0.95) translateY(-20px); }
+                to { opacity: 1; transform: scale(1) translateY(0); }
+            }
+            .animate-modal-in {
+                animation: modalIn 0.3s ease-out forwards;
             }
         `;
       document.head.appendChild(style);
